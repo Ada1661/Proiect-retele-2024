@@ -71,4 +71,4 @@ except KeyboardInterrupt:
     network_restore(ip_router, mac_router, ip_server, mac_server)
     sys.exit(0)
 
-# Sursa: https://ismailakkila.medium.com/black-hat-python-arp-cache-poisoning-with-scapy-7cb1d8b9d242
+# https://ismailakkila.medium.com/black-hat-python-arp-cache-poisoning-with-scapy-7cb1d8b9d242

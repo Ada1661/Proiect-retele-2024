@@ -23,7 +23,7 @@ def get_location(ip):
            if data['status'] == 'success':
               city = data['city']
               region = data['region']
-              contry = data['country']
+              country = data['country']
               return city, region, country
     # pt cazul in care extragerea nu a putut fi facuta
     except Exception as e:
