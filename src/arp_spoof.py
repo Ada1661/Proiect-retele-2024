@@ -73,4 +73,3 @@ except KeyboardInterrupt:
 
 # Sursa:
 # https://ismailakkila.medium.com/black-hat-python-arp-cache-poisoning-with-scapy-7cb1d8b9d242
-
