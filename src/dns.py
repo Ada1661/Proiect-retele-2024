@@ -1,41 +1,41 @@
 import socket, glob, json
 
-# Definirea portului și adresei IP pentru legarea serverului DNS
+# definirea portului si adresei IP pentru legarea serverului DNS
 port = 53
-ip = '127.0.0.1'
+ip = '127.0.0.1' #'127.0.0.1'
 
-# Crearea unui socket UDP
+# crearea unui socket UDP
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((ip, port))
 
 def load_zones():
     """
-    Încarcă datele zonei DNS din fișierele JSON din directorul 'zones'.
+    incarca datele zonei DNS din fisierele JSON din directorul 'zones'.
     """
     jsonzone = {}
-    # Găsește toate fișierele cu extensia .zone în directorul 'zones'
+    # gaseste toate fisierele cu extensia .zone in directorul 'zones'
     zonefiles = glob.glob('zones/*.zone')
 
     for zone in zonefiles:
         with open(zone) as zonedata:
-            data = json.load(zonedata)  # Încarcă datele JSON din fișierul zonei
-            zonename = data["$origin"]  # Obține originea zonei
-            jsonzone[zonename] = data   # Adaugă datele zonei în dicționarul jsonzone
+            data = json.load(zonedata)  # incarca datele JSON din fisierul zonei
+            zonename = data["$origin"]  # obtine originea zonei
+            jsonzone[zonename] = data   # adauga datele zonei in dictionarul jsonzone
     return jsonzone
 
-# Încarcă datele zonei
+# incarca datele zonei
 zonedata = load_zones()
 
 def getflags(flags):
     """
-    Generează flagurile pentru răspunsul DNS.
+    genereaza flagurile pentru raspunsul DNS.
     """
     byte1 = bytes(flags[:1])
     byte2 = bytes(flags[1:2])
 
     rflags = ''
 
-    QR = '1'  # Query/Response (1 pentru răspuns)
+    QR = '1'  # Query/Response (1 pentru raspuns)
 
     # Opcode - setat pe interogare standard
     OPCODE = ''
@@ -52,12 +52,12 @@ def getflags(flags):
     Z = '000'  # Reserved
     RCODE = '0000'  # Response Code
 
-    # Convertim flagurile în bytes și le returnăm
+    # convertim flagurile in bytes si le returnam
     return int(QR + OPCODE + AA + TC + RD, 2).to_bytes(1, byteorder='big') + int(RA + Z + RCODE, 2).to_bytes(1, byteorder='big')
 
 def getquestiondomain(data):
     """
-    Extrage domeniul interogat și tipul întrebării din datele DNS.
+    extrage domeniul interogat si tipul intrebarii din datele DNS.
     """
     state = 0
     expectedlength = 0
@@ -68,10 +68,10 @@ def getquestiondomain(data):
     for byte in data:
         if state == 1:
             if byte != 0:
-                domainstring += chr(byte)  # Construiște stringul domeniului
+                domainstring += chr(byte)  # construiste stringul domeniului
             x += 1
             if x == expectedlength:
-                domainparts.append(domainstring)  # Adaugă partea domeniului la listă
+                domainparts.append(domainstring)  # adauga partea domeniului la lista
                 domainstring = ''
                 state = 0
                 x = 0
@@ -83,14 +83,14 @@ def getquestiondomain(data):
             expectedlength = byte
         y += 1
 
-    # Tipul întrebării (A, TXT etc.)
+    # tipul intrebarii (A, TXT etc.)
     questiontype = data[y:y+2]
 
     return (domainparts, questiontype)
 
 def getzone(domain):
     """
-    Găsește datele zonei corespunzătoare domeniului interogat.
+    gaseste datele zonei corespunzatoare domeniului interogat.
     """
     global zonedata
     zone_name = '.'.join(domain)
@@ -98,12 +98,12 @@ def getzone(domain):
 
 def getrecs(data):
     """
-    Obține înregistrările corespunzătoare din datele DNS.
+    obtine inregistrarile corespunzatoare din datele DNS.
     """
     domain, questiontype = getquestiondomain(data)
     qt = ''
     if questiontype == b'\x00\x01':
-        qt = 'a'  # Tipul A
+        qt = 'a'  # tipul A
 
     zone = getzone(domain)
 
@@ -111,7 +111,7 @@ def getrecs(data):
 
 def buildquestion(domainname, rectype):
     """
-    Construiește secțiunea de întrebare din răspunsul DNS.
+    construieste sectiunea de intrebare din raspunsul DNS.
     """
     qbytes = b''
 
@@ -131,7 +131,7 @@ def buildquestion(domainname, rectype):
 
 def rectobytes(domainname, rectype, recttl, recval):
     """
-    Convertește înregistrările DNS în bytes.
+    converteste inregistrarile DNS in bytes.
     """
     rbytes = b'\xc0\x0c'
 
@@ -151,32 +151,32 @@ def rectobytes(domainname, rectype, recttl, recval):
 
 def buildresponse(data):
     """
-    Construiește răspunsul DNS pe baza întrebării primite.
+    construieste raspunsul DNS pe baza intrebarii primite.
     """
-    # ID-ul tranzacției
+    # ID-ul tranzactiei
     TransactionID = data[:2]
 
-    # Obține flagurile
+    # obtine flagurile
     Flags = getflags(data[2:4])
 
     # Numărul de întrebări
     QDCOUNT = b'\x00\x01'
 
-    # Numărul de răspunsuri
+    # numarul de raspunsuri
     ANCOUNT = len(getrecs(data[12:])[0]).to_bytes(2, byteorder='big')
 
-    # Numărul de Nameserver
+    # numarul de Nameserver
     NSCOUNT = (0).to_bytes(2, byteorder='big')
 
-    # Numărul de înregistrări suplimentare
+    # numarul de inregistrari suplimentare
     ARCOUNT = (0).to_bytes(2, byteorder='big')
 
     dnsheader = TransactionID + Flags + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
 
-    # Creează corpul răspunsului DNS
+    # creeaza corpul raspunsului DNS
     dnsbody = b''
 
-    # Obține răspunsul pentru interogare
+    # obtine raspunsul pentru interogare
     records, rectype, domainname = getrecs(data[12:])
 
     dnsquestion = buildquestion(domainname, rectype)
@@ -186,9 +186,9 @@ def buildresponse(data):
 
     return dnsheader + dnsquestion + dnsbody
 
-# Buclează la infinit pentru a răspunde la interogările DNS
+# bucleaza la infinit pentru a raspunde la interogările DNS
 while 1:
-    data, addr = sock.recvfrom(512)  # Primește date de la client
-    r = buildresponse(data)  # Construiește răspunsul
-    sock.sendto(r, addr)  # Trimite răspunsul clientului
+    data, addr = sock.recvfrom(512)  # primeste date de la client
+    r = buildresponse(data)  # construieste raspunsul
+    sock.sendto(r, addr)  # trimite raspunsul clientului
 

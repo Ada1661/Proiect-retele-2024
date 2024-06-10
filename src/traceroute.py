@@ -99,7 +99,6 @@ def traceroute(ip, port, hop_count = 1):
 
 # in lista astea pastram IP-urile prin care trec pachetele
 routes = []
-#f = open('traceroute.txt', 'w')
 try:
     f = open('traceroute.txt', 'w')
     print('File opened succesfully.')
@@ -107,17 +106,16 @@ except Exception as e:
     print(f'Failed to open file: {e}')
 
 
-# cream un socket de tip UDP pt trimiterea pachetelor
+# am creat un socket de tip UDP pt trimiterea pachetelor
 udp_send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# cream socketul RAW pt primirea pachetelor ICMP
+# am creat un socketul RAW pt primirea pachetelor ICMP
 icmp_recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
 
 # setam timeout pt socketul ICMP
 icmp_recv_socket.settimeout(timeout)
 
 # executam fct traceroute pt un IP de test
-#traceroute('google.com', random_port(), 1)
 print('Starting traceroute...')
 traceroute('google.com', random_port(), 1)
 
