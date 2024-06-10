@@ -3,53 +3,53 @@ import hashlib
 import base64 
 
 def send_dns_request(filename, server_ip):
-    # Construirea unei interogări DNS
+    # construirea unei interogari DNS
     domain = filename.split('.')[0] + '.tunel.live' 
     query = bytearray()
-    query.extend(b'\xAA\xBB')  # ID-ul tranzacției
+    query.extend(b'\xAA\xBB')  # ID-ul tranzactiei
     query.extend(b'\x01\x00')  
-    query.extend(b'\x00\x01')  # QDCOUNT: 1 întrebare
-    query.extend(b'\x00\x00')  # ANCOUNT: 0 Răspuns
-    query.extend(b'\x00\x00')  # NSCOUNT: 0 Înregistrări de servere de nume
-    query.extend(b'\x00\x00')  # ARCOUNT: 0 Înregistrări suplimentare
+    query.extend(b'\x00\x01')  # QDCOUNT: 1 Intrebare
+    query.extend(b'\x00\x00')  # ANCOUNT: 0 Raspuns
+    query.extend(b'\x00\x00')  # NSCOUNT: 0 Inregistrari de servere de nume
+    query.extend(b'\x00\x00')  # ARCOUNT: 0 Inregistrari suplimentare
 
     for part in domain.split('.'):
         query.append(len(part))
         for char in part:
             query.append(ord(char))
-    query.extend(b'\x00')  # Sfârșitul numelui de domeniu
-    query.extend(b'\x00\x10')  # QTYPE: Înregistrare TXT
+    query.extend(b'\x00')  # sfarsitul numelui de domeniu
+    query.extend(b'\x00\x10')  # QTYPE: Inregistrare TXT
     query.extend(b'\x00\x01')  # QCLASS: IN
 
-    # Afisarea interogării construite
-    print(f"Cererea DNS construită: {query.hex()}")
+    # afisarea interogarii construite
+    print(f"Cererea DNS construita: {query.hex()}")
 
-    # Trimiterea interogarii DNS
+    # trimiterea interogarii DNS
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        print(f"Trimiterea cererii către {server_ip}:53")
+        print(f"Trimiterea cererii catre {server_ip}:53")
         sock.sendto(query, (server_ip, 53))
         response, _ = sock.recvfrom(1024)  
 
-    # Depanare: Afisarea raspunsului primit
-    print(f"Răspuns primit: {response.hex()}")
+    # depanare: Afisarea raspunsului primit
+    print(f"Raspuns primit: {response.hex()}")
     return response
 
 def save_file(response, filename):
-    # Parsarea raspunsului DNS pentru a extrage datele fisierului
-    index = 12  # Se sare peste antet
+    # parsarea raspunsului DNS pentru a extrage datele fisierului
+    index = 12  # se sare peste antet
     qdcount = int.from_bytes(response[4:6], byteorder='big')
     ancount = int.from_bytes(response[6:8], byteorder='big')
     print(f"QDCOUNT: {qdcount}, ANCOUNT: {ancount}")
 
-    # Se sar întrebările
+    # se sar întrebarile
     for _ in range(qdcount):
         while response[index] != 0:
             index += 1
-        index += 5  # Se sare peste byte-ul nul și QTYPE + QCLASS
+        index += 5  # se sare peste byte-ul nul și QTYPE + QCLASS
 
     print({index})
 
-    # Procesarea răspunsurilor
+    # procesarea raspunsurilor
     txt_data = bytearray()
     for _ in range(ancount):
         if response[index] == 0xc0:  # Pointer de nume
@@ -80,7 +80,7 @@ def save_file(response, filename):
         decoded_data = base64.b64decode(txt_data)
         with open(filename, 'wb') as file:
             file.write(decoded_data)
-        print(f"Fișierul {filename} a fost salvat.")
+        print(f"Fisierul {filename} a fost salvat.")
     else:
         print("TXT response not found")
 
@@ -91,7 +91,7 @@ def calculate_checksum(filename):
             md5_hash.update(chunk)
     return md5_hash.hexdigest()
 
-# Utilizare de exemplu
+# utilizare de exemplu
 if __name__ == '__main__':
     server_ip = '127.0.0.1'  
     filename = 'retele.com.tunel.live'  

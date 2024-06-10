@@ -1,11 +1,11 @@
 # importul bibliotecilor necesare
-import base64  # pentru codificarea și decodificarea textului
+import base64  # pentru codificarea si decodificarea textului
 import socket  # pentru comunicarea prin socket
-import glob  # pentru cautarea de fisiere în directoare
+import glob  # pentru cautarea de fisiere in directoare
 import json  # pentru manipularea datelor JSON
 import hashlib  # pentru calcularea hash-urilor MD5
 
-# Crearea unui socket UDP pentru a primi cereri DNS
+# crearea unui socket UDP pentru a primi cereri DNS
 port = 53
 ip = '127.0.0.1'
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -19,7 +19,7 @@ def calculate_checksum(filename):
             md5_hash.update(chunk)
     return md5_hash.hexdigest()
 
-# Functie pentru încarcarea datelor zonelor DNS din fisiere JSON
+# functie pentru incarcarea datelor zonelor DNS din fisiere JSON
 def load_zones():
     jsonzone = {}
     zonefiles = glob.glob('zones/*.zone')
@@ -32,7 +32,7 @@ def load_zones():
 
 zonedata = load_zones()
 
-# Funcție pentru construirea setului de flaguri pentru răspunsul DNS
+# functie pentru construirea setului de flaguri pentru raspunsul DNS
 def getflags(flags):
     byte1 = bytes(flags[:1])
     byte2 = bytes(flags[1:2])
@@ -46,7 +46,7 @@ def getflags(flags):
     RCODE = '0000'
     return int(QR + OPCODE + AA + TC + RD, 2).to_bytes(1, byteorder='big') + int(RA + Z + RCODE, 2).to_bytes(1, byteorder='big')
 
-# Functie pentru extragerea domeniului 
+# functie pentru extragerea domeniului 
 def getquestiondomain(data):
     state = 0
     expectedlength = 0
@@ -74,13 +74,13 @@ def getquestiondomain(data):
     questiontype = data[y:y + 2]
     return (domainparts, questiontype)
 
-# Functie pentru construirea înregistrarii TXT pentru raspunsul DNS
+# functie pentru construirea inregistrarii TXT pentru raspunsul DNS
 def build_txt_record(text):
     rbytes = b'\xc0\x0c' + bytes([0]) + bytes([16]) + bytes([0]) + bytes([1]) + int(60).to_bytes(4, byteorder='big')
     rbytes += bytes([0, len(text)]) + text.encode()
     return rbytes
 
-# Functie pentru construirea raspunsului DNS pentru cererea de fisier
+# functie pentru construirea raspunsului DNS pentru cererea de fisier
 def build_file_response(TransactionID, Flags, filename):
     QDCOUNT = b'\x00\x01'
     NSCOUNT = (0).to_bytes(2, byteorder='big')
@@ -110,7 +110,7 @@ def build_file_response(TransactionID, Flags, filename):
         dnsheader = TransactionID + Flags + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
         return dnsheader + dnsbody
 
-# Functie pentru construirea raspunsului DNS in functie de cererea primita
+# functie pentru construirea raspunsului DNS in functie de cererea primita
 def buildresponse(data):
     TransactionID = data[:2]
     Flags = getflags(data[2:4])
@@ -121,7 +121,7 @@ def buildresponse(data):
     else:
         return b''
 
-#bucla pentru primirea și gestionarea cererilor DNS
+# bucla pentru primirea si gestionarea cererilor DNS
 while True:
     data, addr = sock.recvfrom(512)
     print(f"Received data: {data} from {addr}")
