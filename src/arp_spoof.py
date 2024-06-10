@@ -40,7 +40,7 @@ def atac_arp_poison(ip_router, mac_router, ip_server, mac_server):
         network_restore(ip_router, mac_router, ip_server, mac_server)
 
 # inceputul scriptului
-print('[*] incepe script-ul: arp_spoof.py')
+print('[*] Incepe script-ul: arp_spoof.py')
 print('[*] Activam IP forwarding')
 # activam IP forwarding pe Linux
 os.system('sysctl -w net.ipv4.ip_forward=1')
@@ -71,4 +71,5 @@ except KeyboardInterrupt:
     network_restore(ip_router, mac_router, ip_server, mac_server)
     sys.exit(0)
 
+# Sursa:
 # https://ismailakkila.medium.com/black-hat-python-arp-cache-poisoning-with-scapy-7cb1d8b9d242
