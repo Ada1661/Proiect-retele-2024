@@ -5,6 +5,6 @@ RUN apt-get update && apt-get install -y iptables iproute2 libnetfilter-queue-de
 RUN pip3 install --upgrade python-iptables cython
 
 # comentat temporar
-#RUN mkdir -p /scripts
-#COPY src/*.sh /scripts/
+# RUN mkdir -p /scripts
+# COPY src/*.sh /scripts/
 
