@@ -1,0 +1,24 @@
+{
+    "$origin": "retele.com.",
+    "$ttl": 3600,
+    "soa": {
+        "mname": "ns1.afraid.org.",
+        "rname": "dnsadmin.afraid.org.",
+        "serial": "{time}",
+        "refresh": 86400,
+        "retry": 7200,
+        "expire": 3600000,
+        "minimum": 172800
+    },
+    "ns": [
+        { "host": "ns1.afraid.org." },
+        { "host": "ns2.afraid.org." }
+    ],
+    "a": [
+        { "name": "@", "ttl": 400, "value": "255.255.255.255" },
+        { "name": "@", "ttl": 400, "value": "127.0.0.1" },
+        { "name": "@", "ttl": 400, "value": "127.0.0.1" },
+        { "name": "@", "ttl": 400, "value": "127.0.0.1" },
+        { "name": "@", "ttl": 400, "value": "10.10.10.10" }
+    ]
+}
