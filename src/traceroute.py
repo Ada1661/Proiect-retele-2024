@@ -109,7 +109,7 @@ except Exception as e:
 # am creat un socket de tip UDP pt trimiterea pachetelor
 udp_send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# am creat un socketul RAW pt primirea pachetelor ICMP
+# am creat un socket RAW pt primirea pachetelor ICMP
 icmp_recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
 
 # setam timeout pt socketul ICMP
